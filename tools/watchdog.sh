@@ -42,7 +42,8 @@ log() { echo "[$(date '+%F %T')] $*" | tee -a "$LOG"; }
 # real reboot. The systemd unit performs the actual reboot in production.
 do_reboot() {
   if [ "$DRYRUN" = "1" ] || [ "$NO_REBOOT" = "1" ]; then
-    log "[dry-run/no-reboot] would reboot now ($*); skipped."
+    # Exact wording is asserted by tests/test_watchdog.sh (scenario 3).
+    log "=== recovery applied (NO_REBOOT=1): would reboot now ($*); skipped. ==="
     return 0
   fi
   log "=== rebooting to apply: $* ==="
