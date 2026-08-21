@@ -7,7 +7,9 @@ Before=pwnagotchi.service
 
 [Service]
 Type=oneshot
-ExecStart=/opt/pwnagotchi4b/tools/watchdog.sh
+# Invoked via /bin/bash so the script only needs to be readable (robust if /opt
+# is mounted noexec). The file is also +x in the repo for direct execution.
+ExecStart=/bin/bash /opt/pwnagotchi4b/tools/watchdog.sh
 RemainAfterExit=yes
 TimeoutStartSec=1800
 # Watchdog may legitimately reboot the box; don't let systemd kill it for that.

@@ -22,12 +22,24 @@ set -uo pipefail
 REPO_DIR="${PWNAGOTCHI4B_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
 DONE_FLAG="${DONE_FLAG:-/var/lib/pwnagotchi4b/.firstboot_done}"
 PWNAGOTCHI4B_LOG="${FIRSTBOOT_LOG:-/var/log/pwnagotchi4b/firstboot.log}"
-PWNAGOTCHI4B_DRYRUN="${DRYRUN:-0}"
+DRYRUN="${DRYRUN:-0}"
+NO_REBOOT="${NO_REBOOT:-0}"
 
 mkdir -p "$(dirname "$DONE_FLAG")" "$(dirname "$PWNAGOTCHI4B_LOG")"
 source "$REPO_DIR/tools/run_steps.sh"
 
 log() { echo "[$(date '+%F %T')] $*" | tee -a "$PWNAGOTCHI4B_LOG"; }
+
+# Reboot wrapper: honors DRYRUN / NO_REBOOT so the script is testable without a
+# real reboot. The systemd unit performs the actual reboot in production.
+do_reboot() {
+  if [ "$DRYRUN" = "1" ] || [ "$NO_REBOOT" = "1" ]; then
+    log "[dry-run/no-reboot] would reboot here (skipped)."
+    return 0
+  fi
+  log "=== rebooting to activate display + services ==="
+  reboot
+}
 
 # Already ran? (the systemd unit also guards via ConditionPathExists, but be safe)
 if [ -f "$DONE_FLAG" ]; then
@@ -56,5 +68,4 @@ log "=== flagging first boot done and disabling the oneshot ==="
 touch "$DONE_FLAG"
 systemctl disable pwnagotchi4b-firstboot.service 2>/dev/null || true
 
-log "=== rebooting to activate display + services ==="
-reboot
+do_reboot

@@ -27,3 +27,6 @@ Thumbs.db
 # Cloned upstream sources (kept out of the repo; fetched on demand)
 display/fbcp-ili9341/src/
 /upstream/
+
+# VM test scratch (downloaded image, overlays, tarballs)
+tests/vm/.work/

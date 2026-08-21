@@ -38,6 +38,17 @@ source "$REPO_DIR/tools/run_steps.sh"
 
 log() { echo "[$(date '+%F %T')] $*" | tee -a "$LOG"; }
 
+# Reboot wrapper: honors DRYRUN / NO_REBOOT so the script is testable without a
+# real reboot. The systemd unit performs the actual reboot in production.
+do_reboot() {
+  if [ "$DRYRUN" = "1" ] || [ "$NO_REBOOT" = "1" ]; then
+    log "[dry-run/no-reboot] would reboot now ($*); skipped."
+    return 0
+  fi
+  log "=== rebooting to apply: $* ==="
+  reboot
+}
+
 # --- broken-state predicates -------------------------------------------------
 # Each returns 0 if OK, 1 if broken. Kept simple + dependency-free.
 # Paths are overridable via env so the watchdog is testable and relocatable.
@@ -153,15 +164,4 @@ fi
 # the freshly installed components take effect.
 rm -f "$FAILFLAG"
 
-if [ "$DRYRUN" = "1" ]; then
-  log "[dry-run] recovery ok; NOT rebooting, NOT incrementing attempts on disk."
-  exit 0
-fi
-
-if [ "$NO_REBOOT" = "1" ]; then
-  log "=== recovery applied (NO_REBOOT=1); services will start on next natural restart."
-  exit 0
-fi
-
-log "=== recovery succeeded; rebooting to apply ==="
-reboot
+do_reboot "recovery succeeded"

@@ -1,0 +1,14 @@
+[Unit]
+Description=pwnagotchi4b A2A stub bridge (VM integration test)
+Documentation=https://github.com/itsdarklikehell/pwnagotchi4b
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/bin/bash -c '/usr/bin/python3 /opt/pwnagotchi4b/tools/a2a_sim.py --host 0.0.0.0 --port 8700 --token vmtest'
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

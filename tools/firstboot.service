@@ -9,7 +9,10 @@ ConditionPathExists=!/var/lib/pwnagotchi4b/.firstboot_done
 
 [Service]
 Type=oneshot
-ExecStart=/opt/pwnagotchi4b/tools/firstboot.sh
+# Invoked via /bin/bash so the script only needs to be readable (works even if
+# /opt is mounted noexec, e.g. some cloud images). The file is also +x in the
+# repo for direct execution on the Pi.
+ExecStart=/bin/bash /opt/pwnagotchi4b/tools/firstboot.sh
 RemainAfterExit=yes
 # apt update + git clones + (optionally) fbcp-ili9341 build can take a while.
 TimeoutStartSec=1800

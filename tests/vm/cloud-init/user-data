@@ -1,0 +1,17 @@
+#cloud-config
+hostname: pwnagotchi4b-vm
+manage_etc_hosts: true
+users:
+  - name: pwn
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: true
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFnhx0JuyNHFEMpRRKiEBqnhUSgk+tMz6hy9fQzg0bdH rizzo@SgtStroopwafel-Laptop
+packages:
+  - python3
+  - curl
+  - openssh-server
+runcmd:
+  - systemctl enable ssh
+  - systemctl start ssh
+  - "echo 'vmtest' > /etc/pwnagotchi-vm-tag"

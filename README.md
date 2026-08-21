@@ -1,4 +1,4 @@
-# pwnagotchi4b
+sudo systemctl enable --now libvirtd# pwnagotchi4b
 
 Run **Pwnagotchi** + **Fancygotchi** on a **Raspberry Pi 4B** with an
 **off-brand Waveshare 3.5" (B) / ILI9486** SPI screen — then flash a prepared

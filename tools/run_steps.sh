@@ -18,6 +18,9 @@
 #
 set -uo pipefail
 
+# Canonical dry-run flag: honor either DRYRUN (callers) or PWNAGOTCHI4B_DRYRUN (legacy).
+PWNAGOTCHI4B_DRYRUN="${DRYRUN:-${PWNAGOTCHI4B_DRYRUN:-0}}"
+
 # The four installers, in dependency order. label:relative/path
 PWNAGOTCHI4B_STEPS=(
   "display:display/install.sh"
