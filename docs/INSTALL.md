@@ -64,15 +64,39 @@ sudo reboot
 - **legacy GL driver** → builds & runs `fbcp-ili9341` (fast, recommended).
 - **KMS kernel** (`dtoverlay=vc4-kms-v3d`) → uses `fbtft` overlay (robust).
 
-## 4. Verify locally
+## 4. Self-healing watchdog
+
+A watchdog (`tools/watchdog.sh`, systemd `pwnagotchi4b-watchdog.service` +
+`.timer`) runs **on every boot and hourly** and checks for a broken state:
+
+- `pwnagotchi` config missing / unparseable
+- custom `waveshare35b` display class not installed / not registered
+- `Fancygotchi.py` plugin missing
+- a prior setup run recorded a failure (`watchdog.fail`)
+
+If it finds a problem, it **re-runs the failing installer(s)** to recover, then
+reboots so the fix takes effect. Safety rails:
+
+- it only reboots after a **successful** recovery — a still-broken box is left
+  up (so you can inspect it) and retried on the next boot / hourly tick;
+- an **attempt counter** (`/var/lib/pwnagotchi4b/.watchdog_attempts`) caps
+  reboots at `PWNAGOTCHI4B_WATCHDOG_MAX` (default **3**); beyond that it gives
+  up and just logs, preventing a reboot loop on a persistently broken SD;
+- `PWNAGOTCHI4B_WATCHDOG_NOREBOOT=1` makes it repair in place without rebooting.
+
+Logs: `/var/log/pwnagotchi4b/watchdog.log`. The timer is enabled by
+`tools/provision.sh`, so it is active on a freshly flashed image.
+
+## 5. Verify locally
 ```bash
 curl -s http://localhost:8700/.well-known/agent-card.json | head
 curl -s http://localhost:8700/healthz
 sudo journalctl -u pwnagotchi -n 50 | grep -i waveshare35b
 sudo systemctl status fbcp-ili9341   # if fbcp backend
+sudo systemctl status pwnagotchi4b-watchdog.timer   # watchdog active?
 ```
 
-## 5. Unify forces — GLaDOS + Wheatley ↔ Pwnagotchi
+## 6. Unify forces — GLaDOS + Wheatley ↔ Pwnagotchi
 From a GLaDOS (Hermes) or Wheatley (OpenClaw) host on the same LAN:
 ```bash
 # set the Pi's reachable URL + shared token
@@ -89,7 +113,7 @@ OpenClaw `:18800`) by adding the Pi's Agent Card URL as a peer — see
 (state) and `fancyserver` (`:3699` control socket) — A2A is just the remote
 layer on top.
 
-## 6. Troubleshooting
+## 7. Troubleshooting
 - **Blank screen:** check `dmesg | grep -i ili`; confirm `/dev/fb1` exists; verify
   `ui.display.type = "waveshare35b"` in config.toml; re-run `display/install.sh`.
 - **fbcp fails to start on Pi 5 / KMS:** expected — `install.sh` should have
@@ -100,7 +124,7 @@ layer on top.
 - **A2A unreachable:** ensure port 8700 is open on the Pi's firewall and the
   client uses the Pi's LAN IP (mDNS `.local` needs Avahi).
 
-## 7. Update
+## 8. Update
 ```bash
 cd pwnagotchi4b && git pull
 sudo bash tools/provision.sh pi@<pi-ip>   # re-sync repo + config to the Pi

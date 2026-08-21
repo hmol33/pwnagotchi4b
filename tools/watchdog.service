@@ -1,0 +1,19 @@
+[Unit]
+Description=pwnagotchi4b self-healing watchdog (runs on every boot)
+Documentation=https://github.com/itsdarklikehell/pwnagotchi4b
+Wants=network-online.target
+After=network-online.target
+Before=pwnagotchi.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/pwnagotchi4b/tools/watchdog.sh
+RemainAfterExit=yes
+TimeoutStartSec=1800
+# Watchdog may legitimately reboot the box; don't let systemd kill it for that.
+KillMode=none
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

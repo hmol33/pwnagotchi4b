@@ -25,7 +25,7 @@ GLaDOS and Wheatley can query and command.
 | `build/` | Download the `jayofelony` 64-bit image and **flash + provision** an SD card (reuses `pwnagotchi-control-center`). |
 | `mothership/` | **The A2A bridge** (designed with Wheatley). Pi-side A2A agent endpoint at `:8700`. |
 | `clients/` | `glados_client.py` / `wheatley_client.py` — how the two cores talk to the Pi. |
-| `tools/` | `provision.sh` (apply config/plugins/display on a mounted SD or live Pi), `flash.sh` helper. |
+| `tools/` | `provision.sh` (apply config/plugins/display + enable first-boot & watchdog on a mounted SD or live Pi), `flash.sh` helper, `firstboot.sh` + `watchdog.sh` (headless setup + self-healing). |
 | `tests/` | Real A2A simulate round-trip + display-class import check. |
 
 ---

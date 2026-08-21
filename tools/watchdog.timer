@@ -1,0 +1,14 @@
+[Unit]
+Description=pwnagotchi4b self-healing watchdog timer
+Documentation=https://github.com/itsdarklikehell/pwnagotchi4b
+
+[Timer]
+# Re-check periodically in case the box stayed up but something broke at runtime
+# (e.g. a plugin file got deleted, or the A2A service died and was disabled).
+OnBootSec=5min
+OnUnitActiveSec=1h
+Persistent=true
+Unit=pwnagotchi4b-watchdog.service
+
+[Install]
+WantedBy=timers.target

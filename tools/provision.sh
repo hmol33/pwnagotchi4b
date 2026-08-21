@@ -31,7 +31,9 @@ if [[ "$TARGET" == *@* ]]; then
   rsync -avz --exclude='.git' --exclude='build/downloads' "$REPO_ROOT/" "$TARGET:/opt/pwnagotchi4b/"
   ssh "$TARGET" "sudo cp /opt/pwnagotchi4b/config/config.toml /etc/pwnagotchi/config.toml"
   ssh "$TARGET" "sudo install -m 0644 /opt/pwnagotchi4b/tools/firstboot.service /etc/systemd/system/ && sudo install -d /var/lib/pwnagotchi4b && sudo systemctl daemon-reload && sudo systemctl enable pwnagotchi4b-firstboot.service"
-  echo "==> done over SSH. The first boot will run all four installers automatically."
+  # Self-healing watchdog: runs on every boot + hourly (caps reboot attempts).
+  ssh "$TARGET" "sudo install -m 0644 /opt/pwnagotchi4b/tools/watchdog.service /etc/systemd/system/ && sudo install -m 0644 /opt/pwnagotchi4b/tools/watchdog.timer /etc/systemd/system/ && sudo systemctl enable pwnagotchi4b-watchdog.timer"
+  echo "==> done over SSH. First boot runs all four installers; the watchdog keeps it healthy."
   exit 0
 fi
 
@@ -69,7 +71,13 @@ install -m 0644 "$REPO_ROOT/tools/firstboot.service" "$ROOTFS/etc/systemd/system
 # Enable it (systemd symlink into multi-user.target.wants).
 mkdir -p "$ROOTFS/etc/systemd/system/multi-user.target.wants"
 ln -sf "../pwnagotchi4b-firstboot.service" "$ROOTFS/etc/systemd/system/multi-user.target.wants/pwnagotchi4b-firstboot.service"
+# Self-healing watchdog: runs on every boot + hourly (caps reboot attempts).
+install -m 0644 "$REPO_ROOT/tools/watchdog.service" "$ROOTFS/etc/systemd/system/pwnagotchi4b-watchdog.service"
+install -m 0644 "$REPO_ROOT/tools/watchdog.timer" "$ROOTFS/etc/systemd/system/pwnagotchi4b-watchdog.timer"
+mkdir -p "$ROOTFS/etc/systemd/system/timers.target.wants"
+ln -sf "../pwnagotchi4b-watchdog.timer" "$ROOTFS/etc/systemd/system/timers.target.wants/pwnagotchi4b-watchdog.timer"
 echo "==> config.toml written to $ROOTFS/etc/pwnagotchi/config.toml"
 echo "==> repo copied to $ROOTFS/opt/pwnagotchi4b/"
 echo "==> first-boot service ENABLED (runs all four installers on first boot, then reboots)."
+echo "==> watchdog ENABLED (boot + hourly; recovers a broken state, capped at 3 reboots)."
 echo "    Unmount, insert into the Pi, and power on — setup is fully hands-off."
