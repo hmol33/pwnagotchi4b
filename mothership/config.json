@@ -1,0 +1,17 @@
+{
+  "host": "0.0.0.0",
+  "port": 8700,
+  "a2a_token": "REPLACE_WITH_SHARED_SECRET",
+
+  "fancyserver_authkey": "REPLACE_WITH_FANCYSERVER_KEY",
+  "fancyserver_host": "127.0.0.1",
+  "fancyserver_port": 3699,
+
+  "pwnagotchi_api": "http://127.0.0.1:8666/api/v1",
+  "self_url": "http://pwnagotchi4b.local:8700",
+
+  "peers": [
+    { "name": "glados-hermes",      "url": "http://127.0.0.1:9900",  "token": "GLADOS_PEER_TOKEN" },
+    { "name": "wheatley-openclaw",  "url": "http://127.0.0.1:18800", "token": "WHEATLEY_PEER_TOKEN" }
+  ]
+}

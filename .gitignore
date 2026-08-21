@@ -1,0 +1,29 @@
+# Build artifacts
+*.img
+*.img.xz
+*.xz
+build/*.img
+build/downloads/
+*.iso
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+venv/
+
+# Secrets / local config (never commit)
+mothership/config.local.json
+**/config.local.json
+.env
+*.secret
+tokens*
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Cloned upstream sources (kept out of the repo; fetched on demand)
+display/fbcp-ili9341/src/
+/upstream/

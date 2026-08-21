@@ -1,0 +1,89 @@
+# =============================================================================
+# pwnagotchi4b — config.toml for Raspberry Pi 4B + off-brand Waveshare 3.5" (B)
+# Target image: jayofelony/pwnagotchi 64-bit (noai) v2.9.5.8
+# Screen: ILI9486 SPI 320x480 (clone of Waveshare 3.5B)
+#
+# Copy this file to /etc/pwnagotchi/config.toml on the Pi (see tools/provision.sh).
+# Lines are commented with safe defaults; edit to taste.
+# =============================================================================
+
+main.name = "pwnagotchi4b"
+main.lang = "en"
+main.whitelist = []
+
+main.personality.channels = 0
+main.personality.advertise = true
+main.personality.deauth = false
+main.personality.associate = false
+main.personality.internet = false
+
+main.iface = "wlan0"
+# RPi4B has two radios; use the internal one for pwning, keep bluetooth free.
+main.mon_iface = "wlan1"   # only if you add a second dongle; otherwise leave as wlan0
+main.filter = ""
+
+# --- UI / DISPLAY ------------------------------------------------------------
+# Our custom class (display/waveshare35b.py) registers the type "waveshare35b".
+# Fancygotchi reads ui.display.type, so themes apply automatically.
+ui.display.enabled = true
+ui.display.type = "waveshare35b"
+ui.display.rotation = 0      # 0 = landscape; 90/270 = portrait (match your mount)
+ui.fps = 1                   # Fancygotchi wants fps > 0; 1 is fine for SPI
+
+ui.web.enabled = true
+ui.web.address = "0.0.0.0"
+ui.web.port = 8666
+ui.web.username = "pwnagotchi"
+ui.web.password = "CHANGE_ME_STRONG"   # <-- set a real password before exposing
+
+ui.web.on_frame = ""
+
+# --- BETTERCAP ---------------------------------------------------------------
+bettercap.handshakes = "/home/pi/handshakes"
+bettercap.binaries = "/usr/local/bettercap"
+bettercap.silence = true
+bettercap.etc = "/etc/pwnagotchi/bettercap"
+bettercap.timeout = 15
+
+# --- FANCYGOTCHI (theme manager / GUI) ---------------------------------------
+main.plugins.Fancygotchi.enabled = true
+main.plugins.Fancygotchi.enabled_plugins = ""
+main.plugins.Fancygotchi.theme = "default"
+main.plugins.Fancygotchi.rotation = 0      # 0/180 landscape, 90/270 portrait
+main.plugins.Fancygotchi.fancyserver = false
+main.plugins.Fancygotchi.fancyalive = false
+
+# --- PWNMOTHERSHIP (state → central host; also feeds the A2A bridge) ---------
+# Point api_url at your own mothership instance, or leave empty to disable.
+main.plugins.pwnmothership.enabled = true
+main.plugins.pwnmothership.api_url = ""
+
+# --- FANCYSERVER (localhost control socket on :3699; the A2A bridge uses it) -
+main.plugins.fancyserver.enabled = true
+
+# --- CURATED PLUGINS (from itsdarklikehell/pwnagotchi-plugins) ---------------
+# Only enable what you actually want; these are common, working choices.
+main.plugins.auto_update.enabled = false
+main.plugins.webcfg.enabled = true
+main.plugins.onlinehashcrack.enabled = false
+main.plugins.wpa-sec.enabled = false
+main.plugins.gps.enabled = false
+main.plugins.bt-tether.enabled = false
+main.plugins.memtemp.enabled = true
+main.plugins.display_settings.enabled = true
+main.plugins.IPDisplay.enabled = false
+
+# --- A2A MOTHERSHIP BRIDGE (this repo) ---------------------------------------
+# The pwnagotchi_a2a.py service (port 8700) is installed separately by
+# mothership/install.sh. No pwnagotchi-plugin config needed; it talks to
+# fancyserver (:3699) and the local API (:8666) directly.
+
+# --- LOGGING -----------------------------------------------------------------
+main.log.enabled = true
+main.log.path = "/var/log/pwnagotchi/pwnagotchi.log"
+main.log.level = "INFO"
+main.log.size = 10485760
+main.log.backups = 1
+main.log.timestamp = true
+
+main.bettercap.leet = false
