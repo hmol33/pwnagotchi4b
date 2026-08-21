@@ -57,16 +57,16 @@ bash build/download-image.sh
 
 # 3. flash + provision the SD card (interactive: picks the right device)
 sudo bash tools/flash.sh          # wraps build/flash-image.sh + tools/provision.sh
+                                # provision.sh ALSO enables a first-boot service
 
-# 4. (optional) build fbcp-ili9341 on the Pi for the fast display path
-#    copy display/fbcp-ili9341/ over and run display/fbcp-ili9341/build.sh, OR
-#    run the one-shot installer: sudo bash display/install.sh (detect → fbcp|fbtft)
+# 4. insert the SD into the RPi4B and power on. On first boot, the
+#    pwnagotchi4b-firstboot systemd oneshot runs ALL FOUR installers
+#    (display → fancygotchi → plugins → mothership) automatically, then reboots.
+#    No keyboard / SSH needed — fully hands-off.
 
-# 5. boot the Pi. Then start the A2A bridge (mothership):
-sudo bash mothership/install.sh   # installs pwnagotchi_a2a.py as a systemd service
-
-# 6. from GLaDOS / Wheatley hosts, verify:
-python3 clients/glados_client.py   # or clients/wheatley_client.py
+# 5. after the auto-reboot, verify the A2A bridge is live (from any host):
+python3 clients/glados_client.py --peer http://<pi-ip>:8700 get_status
+# or:  python3 clients/wheatley_client.py --peer http://<pi-ip>:8700 get_status
 ```
 
 See [**`docs/INSTALL.md`**](docs/INSTALL.md) for the full, step-by-step procedure,

@@ -21,21 +21,38 @@ bash build/download-image.sh
 # flash + provision (INTERACTIVE — it will ask you to confirm the SD device)
 sudo bash tools/flash.sh
 ```
-`tools/flash.sh` downloads (if needed), flashes the image, then copies this repo
-into the SD's `/opt/pwnagotchi4b/` and writes `config/config.toml` to
-`/etc/pwnagotchi/config.toml`.
+`tools/flash.sh` downloads (if needed), flashes the image, then **provisions**
+the SD: it copies this repo into `/opt/pwnagotchi4b/`, writes
+`config/config.toml` to `/etc/pwnagotchi/config.toml`, and **enables a
+first-boot systemd oneshot** (`pwnagotchi4b-firstboot.service`). The flash step
+is the only interactive part (it asks you to confirm the SD device).
 
-## 2. First boot on the Pi
-Insert the SD, power on. Let it boot ~2 minutes. SSH in (default user `pi`, or
-use the bettercap/USB gadget path per jayofelony wiki).
+## 2. First boot on the Pi — fully headless
+Insert the SD, power on. On first boot the `pwnagotchi4b-firstboot` service runs
+**all four installers automatically**, in order:
 
-Confirm the screen controller:
-```bash
-dmesg | grep -i ili
-ls /sys/bus/spi/devices/
-```
+1. `display/install.sh`     — custom `waveshare35b` class + fbcp|fbtft backend
+2. `fancygotchi/install.sh` — Fancygotchi 2.0 + theme bootstrap
+3. `plugins/install.sh`     — your `itsdarklikehell/pwnagotchi-plugins`
+4. `mothership/install.sh`  — A2A bridge systemd service on `:8700`
 
-## 3. Install components (on the Pi)
+It logs to `/var/log/pwnagotchi4b/firstboot.log`, touches
+`/var/lib/pwnagotchi4b/.firstboot_done`, disables itself, and **reboots** so the
+freshly registered display class + fbtft/fbcp overlay take effect. No keyboard,
+no SSH, no manual commands needed.
+
+> First boot takes a few minutes (apt update + git clones, and possibly building
+> fbcp-ili9341). Watch the log from a laptop on the same LAN:
+> `ssh pi@<pi-ip> 'sudo tail -f /var/log/pwnagotchi4b/firstboot.log'`
+
+If a step fails transiently (e.g. flaky network), the orchestrator **retries
+once** before flagging done — preventing an infinite reboot loop. A persistent
+failure is logged and the Pi still boots normally (you can re-run any installer
+by hand).
+
+## 3. (Optional) manual install — if you skipped provisioning, or want control
+If you did NOT use `tools/provision.sh` (or want to install a single component
+by hand), SSH into the Pi and run:
 ```bash
 sudo bash /opt/pwnagotchi4b/display/install.sh        # custom class + fbcp|fbtft
 sudo bash /opt/pwnagotchi4b/fancygotchi/install.sh    # Fancygotchi 2.0
