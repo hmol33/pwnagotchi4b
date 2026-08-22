@@ -39,7 +39,7 @@ run_steps() {
   for step in "${PWNAGOTCHI4B_STEPS[@]}"; do
     local label="${step%%:*}"
     local rel="${step#*:}"
-    if [ "${#wanted[@]}" -gt 0 ] && [[ ! " ${wanted[*]} " =~ " ${label} " ]]; then
+    if [ "${#wanted[@]}" -gt 0 ] && [[ ! " ${wanted[*]} " =~ ${label} ]]; then
       continue
     fi
     local script="$repo_dir/$rel"

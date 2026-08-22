@@ -15,11 +15,10 @@ set -euo pipefail
 
 PI_USER="${PI_USER:-pi}"
 FB_REPO="https://github.com/juj/fbcp-ili9341.git"
-DISPLAY_DIR="/opt/pwnagotchi4b/display"
 HW_DIR="$(python3 -c 'import pwnagotchi.ui.hw as hw, os; print(os.path.dirname(hw.__file__))' 2>/dev/null || echo /usr/local/lib/python3.11/dist-packages/pwnagotchi/ui/hw)"
 PIN_RST_GPIO=25   # GPIO25 (physical 22) — verify against your clone's schematic
 PIN_DC_GPIO=24    # GPIO24 (physical 18)
-PIN_BL_GPIO=18    # backlight (physical 12) — set high to enable
+# PIN_BL_GPIO=18  # backlight (physical 12) — set high to enable
 
 echo "==> pwnagotchi4b display installer"
 echo "    HW dir : $HW_DIR"

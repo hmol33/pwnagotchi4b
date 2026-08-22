@@ -19,7 +19,6 @@ WORK="$HERE/.work"
 mkdir -p "$WORK"
 
 IMAGE="$WORK/debian.qcow2"
-SSH_PORT=2222
 A2A_PORT=8700
 
 # --- 1. qemu -----------------------------------------------------------------
@@ -52,7 +51,6 @@ trap 'rm -f "$RUN_IMAGE"; [ -f "$WORK/vm.pid" ] && kill "$(cat "$WORK/vm.pid")" 
 
 # --- 3. build stubbed test repo (tarball) ------------------------------------
 bash "$HERE/prepare-testrepo.sh"
-TESTREPO="/tmp/pwnagotchi4b-vmtest"
 tar czf "$WORK/pwnagotchi4b-vmtest.tar.gz" -C /tmp pwnagotchi4b-vmtest
 echo "[ok] tarball: $WORK/pwnagotchi4b-vmtest.tar.gz"
 
