@@ -56,6 +56,21 @@ def run_cmd(s, cmd, wait=3.0):
     return recv(s, wait)
 
 
+def connect_serial(host=SERIAL_HOST, port=SERIAL_PORT, retries=15, delay=2.0):
+    """(Re)connect to QEMU's telnet serial. Retries because after a guest
+    reboot the telnet server may briefly reject new connections."""
+    last = None
+    for _ in range(retries):
+        try:
+            s = socket.create_connection((host, port), timeout=10)
+            time.sleep(0.5)
+            return s
+        except OSError as e:
+            last = e
+            time.sleep(delay)
+    raise last or OSError("serial connect failed")
+
+
 def login(s, retries=4):
     """Robustly log in as root over the serial getty, retrying past races."""
     for attempt in range(retries):
@@ -90,7 +105,7 @@ def main():
     httpd = H.HTTPServer(("0.0.0.0", HTTP_PORT), H.SimpleHTTPRequestHandler)
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
 
-    s = socket.create_connection((SERIAL_HOST, SERIAL_PORT), timeout=10)
+    s = connect_serial()
     time.sleep(1)
     if not login(s):
         print("FAIL: root login did not yield a shell"); sys.exit(1)
@@ -115,10 +130,16 @@ def main():
     out = run_cmd(s, "bash /opt/pwnagotchi4b/tests/vm/provision-guest.sh", wait=15)
     print("[prov]", out.strip()[-400:])
 
-    # Reboot so firstboot + watchdog fire on the new boot.
+    # Reboot so firstboot + watchdog fire on the new boot. The guest reboot
+    # drops the telnet-serial connection, so we close the stale socket and
+    # reconnect fresh afterward.
     run_cmd(s, "reboot", wait=2)
     print("[ok] reboot issued; waiting for return ...")
-    time.sleep(20)
+    try:
+        s.close()
+    except OSError:
+        pass
+    s = connect_serial()
     if not wait_for(s, "localhost login:", timeout=90):
         print("FAIL: guest did not return after reboot"); sys.exit(1)
     if not login(s):

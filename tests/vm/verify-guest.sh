@@ -36,6 +36,9 @@ systemctl is-enabled pwnagotchi4b-watchdog.timer 2>/dev/null | grep -q enabled &
 # 4. A2A bridge up + answering real JSON-RPC (a2a_sim.py on 0.0.0.0:8700).
 curl -fsS http://127.0.0.1:8700/.well-known/agent-card.json >/dev/null 2>&1 && \
   ok "A2A agent card served" || fail "A2A agent card unreachable"
+# /healthz is what tools/fleet_health.py (Cornelis's fleet poller) probes.
+curl -fsS http://127.0.0.1:8700/healthz >/dev/null 2>&1 && \
+  ok "A2A /healthz (fleet-poller endpoint) reachable" || fail "A2A /healthz unreachable"
 # The stub can take a moment to bind; retry briefly.
 RESP=""
 for _ in 1 2 3 4 5; do
@@ -47,6 +50,15 @@ if echo "$RESP" | grep -q '"artifact": "pwnagotchi-status-v1"'; then
   ok "A2A get_status returned expected artifact"
 else
   fail "A2A get_status did not return expected artifact (got: ${RESP:0:120})"
+fi
+# Also exercise the real A2A route clients/glados_client.py &
+# clients/wheatley_client.py POST to (/a2a/jsonrpc).
+RESP2="$(curl -fsS -X POST http://127.0.0.1:8700/a2a/jsonrpc -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"get_status","params":{}}' 2>/dev/null)"
+if echo "$RESP2" | grep -q '"artifact": "pwnagotchi-status-v1"'; then
+  ok "A2A /a2a/jsonrpc (client route) answered get_status"
+else
+  fail "A2A /a2a/jsonrpc did not answer (got: ${RESP2:0:120})"
 fi
 
 # 5. watchdog reports healthy now (no broken state).

@@ -74,7 +74,10 @@ class Handler(BaseHTTPRequestHandler):
             self._send(404, json.dumps({"error": "not found"}))
 
     def do_POST(self):
-        if self.path != "/":
+        # Accept both the bare "/" route (legacy test) and the real A2A spec
+        # route "/a2a/jsonrpc" that clients/glados_client.py &
+        # clients/wheatley_client.py POST to.
+        if self.path not in ("/", "/a2a/jsonrpc"):
             self._send(404, json.dumps({"error": "not found"}))
             return
         length = int(self.headers.get("Content-Length", 0))

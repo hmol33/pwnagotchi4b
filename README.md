@@ -69,6 +69,16 @@ python3 clients/glados_client.py --peer http://<pi-ip>:8700 get_status
 # or:  python3 clients/wheatley_client.py --peer http://<pi-ip>:8700 get_status
 ```
 
+> **A2A bridge contract (what the clients + fleet poller expect):**
+> - Clients POST JSON-RPC to **`/a2a/jsonrpc`** (method `message/send`, a
+>   `{kind: text}` part carrying a JSON command; reply is read from
+>   `result.artifacts[].parts[].text`).
+> - `tools/fleet_health.py` (Cornelis's home-fleet poller) probes **`/healthz`**
+>   (returns `200 {"status":"ok"}`) when `PWNAGOTCHI_A2A_URL` is set.
+> - The agent card lives at **`/.well-known/agent-card.json`**.
+> The test stub `tools/a2a_sim.py` implements all three and is what the VM
+> integration test (`make vm-test`) and `tests/test_a2a_roundtrip.py` exercise.
+
 See [**`docs/INSTALL.md`**](docs/INSTALL.md) for the full, step-by-step procedure,
 and **`mothership/AGENT_SPEC.md`** for the A2A design.
 
