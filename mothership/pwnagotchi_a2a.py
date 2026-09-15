@@ -46,6 +46,39 @@ logging.basicConfig(
 )
 
 # ----------------------------------------------------------------------------
+# Metrics — Prometheus-style snapshot for /metrics endpoint
+# ----------------------------------------------------------------------------
+def _metrics_snapshot() -> Dict[str, Any]:
+    """Return a JSON-serializable snapshot of A2A server metrics."""
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return {
+        "timestamp": now,
+        "server": {
+            "name": "pwnagotchi4b",
+            "version": "0.1.0",
+            "simulate": SIMULATE,
+            "port": CONFIG.get("port", 8700),
+        },
+        "tasks": {
+            "active": len(TASKS),
+            "completed": sum(1 for t in TASKS.values() if t.get("status", {}).get("state") == "completed"),
+            "canceled": sum(1 for t in TASKS.values() if t.get("status", {}).get("state") == "canceled"),
+        },
+        "peers": [
+            {"name": p.get("name"), "url": p.get("url")}
+            for p in CONFIG.get("peers", [])
+        ],
+        "actions_served": list(ACTION_COUNTERS.keys()) if ACTION_COUNTERS else [],
+    }
+
+
+def _inc_action(name: str) -> None:
+    ACTION_COUNTERS[name] = ACTION_COUNTERS.get(name, 0) + 1
+
+
+ACTION_COUNTERS: Dict[str, int] = {}
+
+# ----------------------------------------------------------------------------
 # Config
 # ----------------------------------------------------------------------------
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -362,7 +395,8 @@ def _handle_message_send(params: Dict[str, Any], req_id, cfg: Dict[str, Any]) ->
         task["note"] = "command dispatched; unit may be offline until reboot"
 
     TASKS[task_id] = task
-    LOG.info("task %s -> %s", task_id, task["status"]["state"])
+    _inc_action(action)
+    LOG.info("task %s -> %s (action=%s)", task_id, task["status"]["state"], action)
     return {"jsonrpc": "2.0", "id": req_id, "result": task}
 
 
@@ -436,6 +470,10 @@ def _build_flask_app(cfg: Dict[str, Any]):
     def health():
         return {"ok": True, "simulate": SIMULATE}
 
+    @app.get("/metrics")
+    def metrics():
+        return Response(json.dumps(_metrics_snapshot()), mimetype="application/json")
+
     return app
 
 
@@ -457,6 +495,8 @@ def _build_stdlib_handler(cfg: Dict[str, Any]):
                 self._send(200, agent_card(cfg))
             elif self.path == "/healthz":
                 self._send(200, {"ok": True, "simulate": SIMULATE})
+            elif self.path == "/metrics":
+                self._send(200, _metrics_snapshot())
             else:
                 self._send(404, {"error": "not found"})
 
