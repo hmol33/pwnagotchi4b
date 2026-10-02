@@ -12,6 +12,12 @@ remotely help and control the little unit by unifying their forces over **A2A**.
 
 ## What this repo is
 
+
+[![CI](https://github.com/itsdarklikehell/pwnagotchi4b/actions/workflows/ci.yml/badge.svg)](https://github.com/itsdarklikehell/pwnagotchi4b/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/itsdarklikehell/pwnagotchi4b)](LICENSE)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+
+
 A curated, reproducible build for a RPi4B Pwnagotchi with a 3.5" color screen,
 plus the **"mothership" A2A bridge** that turns the Pi into an agent peer that
 GLaDOS and Wheatley can query and command.
