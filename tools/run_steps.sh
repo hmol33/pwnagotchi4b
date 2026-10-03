@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 #
 # tools/run_steps.sh — shared step-runner for pwnagotchi4b setup.
 #

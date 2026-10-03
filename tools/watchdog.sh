@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 #
 # tools/watchdog.sh — pwnagotchi4b self-healing watchdog.
 #

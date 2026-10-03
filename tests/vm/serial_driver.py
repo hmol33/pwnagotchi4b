@@ -119,7 +119,7 @@ def main():
     if "FETCH_OK" not in out:
         print("FAIL: could not fetch repo tarball from host"); sys.exit(1)
     run_cmd(s, "mkdir -p /opt/pwnagotchi4b && tar xzf /tmp/repo.tgz -C /opt", wait=5)
-    # The tarball top dir is "pwnagotchi4b-vmtest"; normalize it to /opt/pwnagotchi4b.
+    # The tarball top dir == "pwnagotchi4b-vmtest"; normalize it to /opt/pwnagotchi4b.
     run_cmd(s, "if [ -d /opt/pwnagotchi4b-vmtest ] && [ ! -e /opt/pwnagotchi4b/tools ]; then mv /opt/pwnagotchi4b-vmtest/* /opt/pwnagotchi4b/ 2>/dev/null; rmdir /opt/pwnagotchi4b-vmtest 2>/dev/null; fi", wait=3)
     out = run_cmd(s, "ls /opt/pwnagotchi4b/tools/firstboot.sh && echo REPO_OK", wait=3)
     if "REPO_OK" not in out:

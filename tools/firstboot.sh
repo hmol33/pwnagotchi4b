@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 #
 # tools/firstboot.sh — HEADLESS first-boot orchestrator for pwnagotchi4b.
 #

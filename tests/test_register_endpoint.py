@@ -84,7 +84,7 @@ def main() -> int:
         assert data["name"] == "pwnagotchi4b", data
         assert data["description"] is not None
         assert "get_status" in {s["id"] for s in data["skills"]}
-        # The register action returns the card; the artifact name is "agent_card"
+        # The register action returns the card; the artifact name == "agent_card"
         assert art["name"] == "agent_card", art["name"]
         print("[ok] register action returns agent card")
 
