@@ -18,5 +18,3 @@ psutil>=5.8.0
 gpiozero>=1.6.0
 spidev>=3.5
 
-# A2A bridge
-a2a-sdk>=0.1.0
